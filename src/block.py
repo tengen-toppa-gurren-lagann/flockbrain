@@ -19,7 +19,7 @@ class Block:
         while True:
             cur_str = str(self.index) + self.prev_hash + self.data + str(self.nonce)
             cur_hash = sha256(cur_str.encode('utf-8')).hexdigest()
-            if cur_hash[-4:] == "0000":  # Достигли нужного значения хеша
+            if cur_hash[-4:] == "0000":  # Достигнуто нужное значение хеша
                 self.hash = cur_hash
                 break
             # Каждый узел изменяет значение nonce по-разному:
