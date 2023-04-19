@@ -3,8 +3,47 @@ import threading
 import grequests
 import argparse
 from node import Node
+from time import sleep
 from gevent import monkey
 monkey.patch_all()
+
+
+def start_blockchain(current_node, node_address, node2_address, node3_address, make_genesis):
+    web_server = Bottle(__name__)  # Создаем веб-сервер для приема сообщений от узлов
+
+    # Обработчик POST-запросов (входящих сообщений)
+    @web_server.post("/")
+    def message_handler():
+        message = request.json
+        if current_node.process_message(message):
+            return "Message processed"
+        return "Message processing error"
+
+    # Определяем хост и порт узла
+    node_host = node_address.split(':')[0]
+    node_port = node_address.split(':')[1]
+
+    # Запускаем поток с веб-сервером для приема POST-запросов
+    thread_web_server = threading.Thread(
+        target=lambda: run(app=web_server, host=node_host, port=int(node_port), quiet=True), daemon=False)
+    thread_web_server.start()
+
+    def blocks_maker():  # Производитель блоков для блокчейна
+        nodes_urls = [f'http://{node_address}/',
+                      f'http://{node2_address}/',
+                      f'http://{node3_address}/']
+        while True:
+            new_block = current_node.make_block(make_genesis)  # Производим блок
+            if new_block is not None:  # Блок произведён успешно
+                # Создаем набор http-запросов - сообщений с информацией о новом блоке для всех узлов
+                requests = (grequests.post(url, json=new_block.get_json()) for url in nodes_urls)
+                # Отправляем запросы всем узлам (в т.ч. и себе)
+                grequests.map(requests)
+            sleep(0.1)
+
+    # Запускаем поток с производителем блоков
+    thread_blocks_maker = threading.Thread(target=blocks_maker(), daemon=False)
+    thread_blocks_maker.start()
 
 
 if __name__ == '__main__':
@@ -18,43 +57,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     node_id = args.id
-    node_address: str = args.node
-    node2_address: str = args.node2
-    node3_address: str = args.node3
-    make_genesis: bool = args.f
+    address: str = args.node
+    address2: str = args.node2
+    address3: str = args.node3
+    genesis: bool = args.f
 
-    # Определяем хост и порт узла
-    node_host = node_address.split(':')[0]
-    node_port = node_address.split(':')[1]
+    # Создаем узел
+    node = Node(node_id)
 
-    node = Node(node_id)  # Создаем узел
-
-    def blocks_maker():  # Производитель блоков
-        nodes_urls = [f'http://{node_address}/',
-                      f'http://{node2_address}/',
-                      f'http://{node3_address}/']
-        while True:
-            new_block = node.make_block(make_genesis)  # Производим блок
-            if new_block is not None:
-                # Создаем набор http-запросов - сообщений с информацией о новом блоке для всех узлов
-                requests = (grequests.post(url, json=new_block.get_json()) for url in nodes_urls)
-                # Отправляем запросы всем узлам (в т.ч. и себе)
-                grequests.map(requests)
-
-    web_server = Bottle(__name__)  # Создаем веб-сервер для приема сообщений от узлов
-
-    # Обработчик POST-запросов (входящих сообщений)
-    @web_server.post("/")
-    def message_handler():
-        message = request.json
-        if node.process_message(message):
-            return "Message processed"
-        return "Message processing error"
-
-    # Запускаем поток с веб-сервером для приема POST-запросов
-    thread_web_server = threading.Thread(target=lambda: run(app=web_server, host=node_host, port=int(node_port), quiet=True), daemon=False)
-    thread_web_server.start()
-
-    # Запускаем поток с производителем блоков
-    thread_blocks_maker = threading.Thread(target=blocks_maker(), daemon=False)
-    thread_blocks_maker.start()
+    # Запускаем формирование блокчейна
+    start_blockchain(node, address, address2, address3, genesis)

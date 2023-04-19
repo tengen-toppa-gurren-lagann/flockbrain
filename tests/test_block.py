@@ -3,10 +3,13 @@ import json
 from block import Block
 
 
-@pytest.mark.parametrize("node_id", [1, 2, 3])  # Тестируем для всех трех узлов
+pytestmark = pytest.mark.parametrize("node_id", [1, 2, 3])  # Все тесты в модуле проводим для всех трех узлов
+
+
 def test_block_init(node_id):
     prev_hash = "NONE"
     for i in range(1, 10):
+        # Проверим правильность создания блока
         block = Block(i, prev_hash, node_id)
         assert block is not None
         assert block.index == i
@@ -16,10 +19,17 @@ def test_block_init(node_id):
         assert all(char.isalnum() for char in block.data)
         assert len(block.hash) == 64
         assert block.hash[-4:] == "0000"
+        # Проверим правильность создания копии блока
+        block2 = Block(block.index, block.prev_hash, block.node_id, block.data, block.hash, block.nonce)
+        assert block2.index == block.index
+        assert block2.prev_hash == block.prev_hash
+        assert block2.node_id == block.node_id
+        assert block2.data == block.data
+        assert block2.hash == block.hash
+        assert block2.nonce == block.nonce
         prev_hash = block.hash
 
 
-@pytest.mark.parametrize("node_id", [1, 2, 3])
 def test_block_get_json(node_id):  # Тестируем для всех трех узлов
     prev_hash = "NONE"
     for i in range(1, 10):
@@ -33,20 +43,4 @@ def test_block_get_json(node_id):  # Тестируем для всех трех
         assert block.hash == object_from_json['hash']
         assert block.data == object_from_json['data']
         assert block.nonce == object_from_json['nonce']
-        prev_hash = block.hash
-
-
-@pytest.mark.parametrize("node_id", [1, 2, 3])  # Тестируем для всех трех узлов
-def test_block_get_block(node_id):
-    prev_hash = "NONE"
-    for i in range(1, 10):
-        block = Block(i, prev_hash, node_id)
-        json_from_block = block.get_json()
-        block2 = Block.get_block(json_from_block)
-        assert block.node_id == block2.node_id
-        assert block.index == block2.index
-        assert block.prev_hash == block2.prev_hash
-        assert block.hash == block2.hash
-        assert block.data == block2.data
-        assert block.nonce == block2.nonce
         prev_hash = block.hash
