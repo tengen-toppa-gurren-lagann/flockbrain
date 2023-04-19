@@ -1,7 +1,7 @@
 import json
 import logging
 
-from block import Block
+from src.block import Block
 
 DEBUG = True
 

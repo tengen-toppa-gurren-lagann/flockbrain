@@ -2,7 +2,7 @@ from bottle import Bottle, run, request
 import threading
 import grequests
 import argparse
-from node import Node
+from src.node import Node
 from time import sleep
 from gevent import monkey
 monkey.patch_all()
