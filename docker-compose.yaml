@@ -1,0 +1,20 @@
+version: "2.13"
+
+services:
+  node1:
+    build: .
+    network_mode: "host"
+    command: -id 1 -node 127.0.0.1:10000 -node2 127.0.0.1:10001 -node3 127.0.0.1:10002
+
+  node3:
+    build: .
+    network_mode: "host"
+    command: -id 3 -node 127.0.0.1:10002 -node2 127.0.0.1:10000 -node3 127.0.0.1:10001
+
+  node2:
+    build: .
+    network_mode: "host"
+    command: -id 2 -f -node 127.0.0.1:10001 -node2 127.0.0.1:10000 -node3 127.0.0.1:10002
+    depends_on:
+      - node1
+      - node3
