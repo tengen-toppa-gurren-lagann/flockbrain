@@ -2,7 +2,9 @@ import pytest
 from node import Node
 
 
-@pytest.mark.parametrize("node_id", [1, 2, 3])  # Тестируем для всех трех узлов
+pytestmark = pytest.mark.parametrize("node_id", [1, 2, 3])  # Все тесты в модуле проводим для всех трех узлов
+
+
 def test_node_init(node_id):
     node = Node(node_id)
     assert node is not None
@@ -11,7 +13,6 @@ def test_node_init(node_id):
     assert len(node.blockchain) == 0
 
 
-@pytest.mark.parametrize("node_id", [1, 2, 3])  # Тестируем для всех трех узлов
 def test_node_make_block(node_id):
     n = 10
     node = Node(node_id)
@@ -36,7 +37,6 @@ def test_node_make_block(node_id):
         assert block.prev_hash == prev_hash
 
 
-@pytest.mark.parametrize("node_id", [1, 2, 3])  # Тестируем для всех трех узлов
 def test_node_process_message(node_id):
     n = 50
     node = Node(node_id)
