@@ -1,6 +1,6 @@
 import pytest
 import json
-from block import Block
+from src.block import Block
 
 
 pytestmark = pytest.mark.parametrize("node_id", [1, 2, 3])  # Все тесты в модуле проводим для всех трех узлов

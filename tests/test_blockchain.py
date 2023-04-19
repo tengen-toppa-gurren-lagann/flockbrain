@@ -1,8 +1,8 @@
 import pytest
 import threading
 from time import sleep
-from node import Node
-from main import start_blockchain
+from src.node import Node
+from src.main import start_blockchain
 
 
 @pytest.mark.parametrize("node_id, node_address, node2_address, node3_address, make_genesis",
