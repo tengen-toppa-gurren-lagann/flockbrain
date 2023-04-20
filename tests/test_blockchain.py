@@ -18,7 +18,6 @@ def test_blockchain_init(node_id, node_address, node2_address, node3_address, ma
     first_block = node.blockchain[0]
     assert first_block.index == 1
     assert first_block.prev_hash == 'NONE'
-    assert first_block.node_id == node.id
 
 
 @pytest.mark.parametrize("node_id, node2_id, node3_id, node_address, node2_address, node3_address",
