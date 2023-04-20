@@ -1,3 +1,5 @@
+from time import sleep
+
 import pytest
 from src.node import Node
 from src.main import Starter
@@ -33,7 +35,9 @@ def test_blockchain(node_id, node2_id, node3_id, node_address, node2_address, no
     starter3 = Starter(node3, node_address, node3_address, node_address, True)
 
     starter1.start_message_receiver()
+    sleep(0.1)
     starter2.start_message_receiver()
+    sleep(0.1)
     starter3.start_blockchain(n_blocks)
 
     for i in range(0, n_blocks):
