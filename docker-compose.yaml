@@ -3,18 +3,36 @@ version: "2.13"
 services:
   node1:
     build: .
-    network_mode: "host"
-    command: -id 1 -node 127.0.0.1:10000 -node2 127.0.0.1:10001 -node3 127.0.0.1:10002
+    image: flockbrain
+    container_name: Node1
+    environment:
+      ID: 1
+      ADDRESS: Node1:10000
+      ADDRESS2: Node2:10001
+      ADDRESS3: Node3:10002
+      GENESIS: 0
 
   node3:
     build: .
-    network_mode: "host"
-    command: -id 3 -node 127.0.0.1:10002 -node2 127.0.0.1:10000 -node3 127.0.0.1:10001
+    image: flockbrain
+    container_name: Node3
+    environment:
+      ID: 3
+      ADDRESS: Node3:10002
+      ADDRESS2: Node1:10000
+      ADDRESS3: Node2:10001
+      GENESIS: 0
 
   node2:
     build: .
-    network_mode: "host"
-    command: -id 2 -f -node 127.0.0.1:10001 -node2 127.0.0.1:10000 -node3 127.0.0.1:10002
+    image: flockbrain
+    container_name: Node2
+    environment:
+      ID: 2
+      ADDRESS: Node2:10001
+      ADDRESS2: Node1:10000
+      ADDRESS3: Node3:10002
+      GENESIS: 1
     depends_on:
       - node1
       - node3
