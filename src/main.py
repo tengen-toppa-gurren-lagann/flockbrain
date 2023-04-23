@@ -1,7 +1,7 @@
 from bottle import Bottle, run, request
+import os
 import threading
 import grequests
-import argparse
 from src.node import Node
 from time import sleep
 from gevent import monkey
@@ -47,20 +47,32 @@ def start_blockchain(current_node, node_address, node2_address, node3_address, m
 
 
 if __name__ == '__main__':
-    # Разбираем параметры командной строки
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-id', type=int, choices=[1, 2, 3], help='Node ID')
-    parser.add_argument('-f', action='store_true', help='Generate first block (genesis)')
-    parser.add_argument('-node', type=str, help='Node address:port')
-    parser.add_argument('-node2', type=str, help='Node2 address:port')
-    parser.add_argument('-node3', type=str, help='Node3 address:port')
-    args = parser.parse_args()
-
-    node_id = args.id
-    address: str = args.node
-    address2: str = args.node2
-    address3: str = args.node3
-    genesis: bool = args.f
+    # Разбираем параметры окружения
+    if 'ID' in os.environ:
+        node_id = int(os.environ['ID'])
+    else:
+        print("No ID in environment")
+        exit(1)
+    if 'ADDRESS' in os.environ:
+        address = str(os.environ['ADDRESS'])
+    else:
+        print("No ADDRESS in environment")
+        exit(1)
+    if 'ADDRESS2' in os.environ:
+        address2 = str(os.environ['ADDRESS2'])
+    else:
+        print("No ADDRESS2 in environment")
+        exit(1)
+    if 'ADDRESS3' in os.environ:
+        address3 = str(os.environ['ADDRESS3'])
+    else:
+        print("No ADDRESS3 in environment")
+        exit(1)
+    if 'GENESIS' in os.environ:
+        genesis = True if int(os.environ['GENESIS']) == 1 else False
+    else:
+        print("No GENESIS in environment")
+        exit(1)
 
     # Создаем узел
     node = Node(node_id)
